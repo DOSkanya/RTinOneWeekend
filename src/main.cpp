@@ -87,7 +87,7 @@ int main() {
 	auto world = random_scene();
 
 	//BVH
-	bvh_node bvh_tree(world.objects, 0, world.objects.size(), 0.0, 0.0);
+	bvh_node bvh_tree(world, 0.0, 0.0);
 	//std::cerr << "BVH has been successfully build.\n";
 
 	//Camera

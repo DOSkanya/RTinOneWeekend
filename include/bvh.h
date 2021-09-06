@@ -79,7 +79,7 @@ bvh_node::bvh_node(const std::vector<shared_ptr<hittable>>& src_objects,
 	aabb box_left, box_right;
 
 	if (!left->bounding_box(time0, time1, box_left)
-		|| !right->bounding_box(time0, time1, box_right))
+		|| !right->bounding_box(time0, time1, box_right)) { }
 		//std::cerr << "NO bounding box in bvh_node constructor.\n";
 
 	box = surrounding_box(box_left, box_right);

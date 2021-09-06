@@ -46,7 +46,8 @@ hittable_list random_scene() {
 					auto albedo = color::random() * color::random();
 					sphere_material = make_shared<lambertian>(albedo);
 					auto center2 = center + vec3(0, random_double(0, 0.5), 0);
-					world.add(make_shared<moving_sphere>(center, center2, 0.0, 1.0, 0.2, sphere_material));
+					//world.add(make_shared<moving_sphere>(center, center2, 0.0, 1.0, 0.2, sphere_material));
+					world.add(make_shared<sphere>(center, 0.2, sphere_material));
 				}
 				else if (choose_mat < 0.95) {
 					auto albedo = color::random(0.5, 1);
@@ -86,11 +87,11 @@ int main() {
 	auto world = random_scene();
 
 	//BVH
-	bvh_node bvh_tree(world, 0.0, 0.0);
+	bvh_node bvh_tree(world.objects, 0, world.objects.size(), 0.0, 0.0);
 	//std::cerr << "BVH has been successfully build.\n";
 
 	//Camera
-	point3 lookfrom(13, 2, 3);
+ 	point3 lookfrom(13, 2, 3);
 	point3 lookat(0, 0, 0);
 	vec3 vup(0, 1, 0);
 	auto dist_to_focus = 10.0;

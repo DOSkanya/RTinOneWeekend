@@ -1,8 +1,8 @@
 #pragma once
 #include "rtweekend.h"
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "perlin.h"
-
 #include <iostream>
 
 class texture {

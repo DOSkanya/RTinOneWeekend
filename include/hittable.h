@@ -107,6 +107,8 @@ rotate_y::rotate_y(shared_ptr<hittable> p, double angle) : ptr(p) {
 			}
 		}
 	}
+
+	bbox = aabb(min, max);
 }
 
 bool rotate_y::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {

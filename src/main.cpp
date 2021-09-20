@@ -202,7 +202,7 @@ int main() {
 	auto aperture = 0.0;
 	color background(0, 0, 0);
 
-	switch (6) {
+	switch (7) {
 		case 1 :
 			world = random_scene();
 			background = color(0.70, 0.80, 1.00);
@@ -249,6 +249,18 @@ int main() {
 			world = cornell_box();
 			aspect_ratio = 1.0;
 			image_width = 1200;
+			image_height = static_cast<int>(image_width / aspect_ratio);
+			samples_per_pixel = 200;
+			background = color(0.0, 0.0, 0.0);
+			lookfrom = point3(278, 278, -800);
+			lookat = point3(278, 278, 0);
+			vfov = 40.0;
+			break;
+
+		case 7:
+			world = cornell_smoke();
+			aspect_ratio = 1.0;
+			image_width = 800;
 			image_height = static_cast<int>(image_width / aspect_ratio);
 			samples_per_pixel = 200;
 			background = color(0.0, 0.0, 0.0);

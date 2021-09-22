@@ -329,9 +329,9 @@ int main() {
 		case 8:
 			world = final_scene();
 			aspect_ratio = 1.0;
-			image_width = 800;
+			image_width = 400;
 			image_height = static_cast<int>(image_width / aspect_ratio);
-			samples_per_pixel = 10000;
+			samples_per_pixel = 100;
 			background = color(0, 0, 0);
 			lookfrom = point3(478, 278, -600);
 			lookat = point3(278, 278, 0);

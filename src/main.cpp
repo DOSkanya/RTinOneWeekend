@@ -245,6 +245,9 @@ hittable_list final_scene() {
 hittable_list test() {
 	hittable_list objects;
 
+	auto light = make_shared<diffuse_light>(color(7, 7, 7));
+	objects.add(make_shared<xz_rect>(123, 423, 147, 412, 554, light));
+
 	auto center1 = point3(400, 400, 200);
 	auto center2 = center1 + vec3(30, 0, 0);
 	auto moving_sphere_material = make_shared<lambertian>(color(0.7, 0.3, 0.1));
@@ -270,7 +273,7 @@ int main() {
 	auto aperture = 0.0;
 	color background(0, 0, 0);
 
-	switch (8) {
+	switch (9) {
 		case 1 :
 			world = random_scene();
 			background = color(0.70, 0.80, 1.00);

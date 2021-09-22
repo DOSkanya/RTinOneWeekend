@@ -242,6 +242,17 @@ hittable_list final_scene() {
 	return objects;
 }
 
+hittable_list test() {
+	hittable_list objects;
+
+	auto center1 = point3(400, 400, 200);
+	auto center2 = center1 + vec3(30, 0, 0);
+	auto moving_sphere_material = make_shared<lambertian>(color(0.7, 0.3, 0.1));
+	objects.add(make_shared<moving_sphere>(center1, center2, 0, 1, 50, moving_sphere_material));
+
+	return objects;
+}
+
 
 int main() {
 	//Image
@@ -328,6 +339,18 @@ int main() {
 			
 		case 8:
 			world = final_scene();
+			aspect_ratio = 1.0;
+			image_width = 400;
+			image_height = static_cast<int>(image_width / aspect_ratio);
+			samples_per_pixel = 100;
+			background = color(0, 0, 0);
+			lookfrom = point3(478, 278, -600);
+			lookat = point3(278, 278, 0);
+			vfov = 40.0;
+			break;
+
+		case 9:
+			world = test();
 			aspect_ratio = 1.0;
 			image_width = 400;
 			image_height = static_cast<int>(image_width / aspect_ratio);

@@ -216,7 +216,7 @@ hittable_list final_scene() {
 	auto moving_sphere_material = make_shared<lambertian>(color(0.7, 0.3, 0.1));
 	objects.add(make_shared<moving_sphere>(center1, center2, 0, 1, 50, moving_sphere_material));
 
-	objects.add(make_shared<sphere>(point3(360, 150, 145), 70, make_shared<dielectric>(1.5)));
+	objects.add(make_shared<sphere>(point3(260, 150, 45), 50, make_shared<dielectric>(1.5)));
 	objects.add(make_shared<sphere>(point3(0, 150, 145), 50, make_shared<metal>(color(0.8, 0.8, 0.9), 1.0)));
 
 	auto boundary = make_shared<sphere>(point3(360, 150, 145), 70, make_shared<dielectric>(1.5));
@@ -228,7 +228,7 @@ hittable_list final_scene() {
 	auto emat = make_shared<lambertian>(make_shared<image_texture>("earthmap.jpg"));
 	objects.add(make_shared<sphere>(point3(400, 200, 400), 100, emat));
 	auto pertext = make_shared<noise_texture>(0.1);
-	objects.add(make_shared<sphere>(point3(220, 280, 330), 80, make_shared<lambertian>(pertext)));
+	objects.add(make_shared<sphere>(point3(220, 280, 300), 80, make_shared<lambertian>(pertext)));
 
 	hittable_list boxes2;
 	auto white = make_shared<lambertian>(color(.73, .73, .73));

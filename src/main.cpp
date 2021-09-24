@@ -364,34 +364,34 @@ int main() {
 	//Render
 
 	int tile_width = 0, tile_height = 0;
-	int tile_scale = 200;
-	std::vector<tile> tile_array;
+	int tile_scale = 100;
+	std::vector<tile*> tile_array;
 	while (tile_width < image_width && tile_height < image_height) {
 		if (tile::cores_left > 0) {
 			if ((tile_width + tile_scale) >= image_width && (tile_height + tile_scale) >= image_height) {
-				tile t(tile_width, image_width, tile_height, image_height, image_width, image_height);
+				tile* t = new tile(tile_width, image_width, tile_height, image_height, image_width, image_height);
 				tile_array.push_back(t);
-				t.render(bvh_tree, cam, background, max_depth, samples_per_pixel);
+				t->render(bvh_tree, cam, background, max_depth, samples_per_pixel);
 				tile_width = 0;
 				tile_height = tile_height + tile_scale;
 			}
 			else if ((tile_width + tile_scale) >= image_width && (tile_height + tile_scale) < image_height) {
-				tile t(tile_width, image_width, tile_height, tile_height + tile_scale, image_width, image_height);
+				tile* t = new tile(tile_width, image_width, tile_height, tile_height + tile_scale, image_width, image_height);
 				tile_array.push_back(t);
-				t.render(bvh_tree, cam, background, max_depth, samples_per_pixel);
+				t->render(bvh_tree, cam, background, max_depth, samples_per_pixel);
 				tile_width = 0;
 				tile_height = tile_height + tile_scale;
 			}
 			else if ((tile_width + tile_scale) < image_width && (tile_height + tile_scale) >= image_height) {
-				tile t(tile_width, tile_width + tile_scale, tile_height, image_height, image_width, image_height);
+				tile* t = new tile(tile_width, tile_width + tile_scale, tile_height, image_height, image_width, image_height);
 				tile_array.push_back(t);
-				t.render(bvh_tree, cam, background, max_depth, samples_per_pixel);
+				t->render(bvh_tree, cam, background, max_depth, samples_per_pixel);
 				tile_width = tile_width + tile_scale;
 			}
 			else if ((tile_width + tile_scale) < image_width && (tile_height + tile_scale) < image_height) {
-				tile t(tile_width, tile_width + tile_scale, tile_height, tile_height + tile_scale, image_width, image_height);
+				tile* t = new tile(tile_width, tile_width + tile_scale, tile_height, tile_height + tile_scale, image_width, image_height);
 				tile_array.push_back(t);
-				t.render(bvh_tree, cam, background, max_depth, samples_per_pixel);
+				t->render(bvh_tree, cam, background, max_depth, samples_per_pixel);
 				tile_width = tile_width + tile_scale;
 			}
 		}
@@ -406,9 +406,9 @@ int main() {
 	//Output
 	color* pixel_color = new color[image_width * image_height];
 	for (auto ti : tile_array) {
-		for (int j = ti.height_end - 1; j >= ti.height_begin; --j) {
-			for (int i = ti.width_begin; i < ti.width_end; i++) {
-				pixel_color[(image_height - 1 - j) * image_width + i] = ti.color_block[(j - ti.height_begin) * (ti.width_end - ti.width_begin) + (i - ti.width_begin)];
+		for (int j = ti->height_end - 1; j >= ti->height_begin; --j) {
+			for (int i = ti->width_begin; i < ti->width_end; i++) {
+				pixel_color[(image_height - 1 - j) * image_width + i] = ti->color_block[(j - ti->height_begin) * (ti->width_end - ti->width_begin) + (i - ti->width_begin)];
 			}
 		}
 	}

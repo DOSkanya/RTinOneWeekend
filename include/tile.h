@@ -72,11 +72,11 @@ void thread_function(tile& t, bvh_node& bvh, camera& cam, color& background, int
 	t.cores_left = t.cores_left + 1;
 	change.unlock();
 
-	std::cout << "thread has quit." << std::endl;
+	//std::cout << "thread has quit." << std::endl;
 }
 
 void tile::render(bvh_node& bvh, camera& cam, color& background, int max_depth, int samples_per_pixel) {
-	std::cout << "tile has been created." << std::endl;
+	//std::cout << "tile has been created." << std::endl;
 	change.lock();
 	cores_left = cores_left - 1;
 	std::thread rendering(thread_function, std::ref(*this), std::ref(bvh), std::ref(cam), std::ref(background), max_depth, samples_per_pixel);

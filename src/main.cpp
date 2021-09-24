@@ -10,26 +10,11 @@
 #include "aarect.h"
 #include "box.h"
 #include "constant_medium.h"
+#include "tile.h"
+#include <thread>
+#include <mutex>
 
-color ray_color(const ray& r, const color& background, const hittable& world, const bvh_node& bvh, int depth) {
-	hit_record rec;
-
-	//If we've exceeded the ray bounce limit, no more light is gathered.
-	if (depth <= 0)
-		return color(0, 0, 0);
-
-	if (!bvh.hit(r, 0.001, infinity, rec))
-		return background;
-
-	ray scattered;
-	color attenuation;
-	color emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
-
-	if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered))
-		return emitted;
-
-	return emitted + attenuation * ray_color(scattered, background, world, bvh, depth - 1);
-}
+std::mutex change;
 
 //First scene
 hittable_list random_scene() {
@@ -211,11 +196,6 @@ hittable_list final_scene() {
 	auto light = make_shared<diffuse_light>(color(7, 7, 7));
 	objects.add(make_shared<xz_rect>(123, 423, 147, 412, 554, light));
 
-	auto center1 = point3(400, 400, 200);
-	auto center2 = center1 + vec3(30, 0, 0);
-	auto moving_sphere_material = make_shared<lambertian>(color(0.7, 0.3, 0.1));
-	objects.add(make_shared<moving_sphere>(center1, center2, 0, 1, 50, moving_sphere_material));
-
 	objects.add(make_shared<sphere>(point3(260, 150, 45), 50, make_shared<dielectric>(1.5)));
 	objects.add(make_shared<sphere>(point3(0, 150, 145), 50, make_shared<metal>(color(0.8, 0.8, 0.9), 1.0)));
 
@@ -273,7 +253,7 @@ int main() {
 	auto aperture = 0.0;
 	color background(0, 0, 0);
 
-	switch (9) {
+	switch (2) {
 		case 1 :
 			world = random_scene();
 			background = color(0.70, 0.80, 1.00);
@@ -378,10 +358,68 @@ int main() {
 
 	camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
 
+	//Parallelize: Get threads that can be concurrently executed
+	int _threadNum = std::thread::hardware_concurrency();
+	tile::cores_left = _threadNum;
 	//Render
-	std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
-	for (int j = image_height - 1; j >= 0; --j) {
+	int tile_width = 0, tile_height = 0;
+	int tile_scale = 200;
+	std::vector<tile> tile_array;
+	while (tile_width < image_width && tile_height < image_height) {
+		if (tile::cores_left > 0) {
+			if ((tile_width + tile_scale) >= image_width && (tile_height + tile_scale) >= image_height) {
+				tile t(tile_width, image_width, tile_height, image_height, image_width, image_height);
+				tile_array.push_back(t);
+				t.render(bvh_tree, cam, background, max_depth, samples_per_pixel);
+				tile_width = 0;
+				tile_height = tile_height + tile_scale;
+			}
+			else if ((tile_width + tile_scale) >= image_width && (tile_height + tile_scale) < image_height) {
+				tile t(tile_width, image_width, tile_height, tile_height + tile_scale, image_width, image_height);
+				tile_array.push_back(t);
+				t.render(bvh_tree, cam, background, max_depth, samples_per_pixel);
+				tile_width = 0;
+				tile_height = tile_height + tile_scale;
+			}
+			else if ((tile_width + tile_scale) < image_width && (tile_height + tile_scale) >= image_height) {
+				tile t(tile_width, tile_width + tile_scale, tile_height, image_height, image_width, image_height);
+				tile_array.push_back(t);
+				t.render(bvh_tree, cam, background, max_depth, samples_per_pixel);
+				tile_width = tile_width + tile_scale;
+			}
+			else if ((tile_width + tile_scale) < image_width && (tile_height + tile_scale) < image_height) {
+				tile t(tile_width, tile_width + tile_scale, tile_height, tile_height + tile_scale, image_width, image_height);
+				tile_array.push_back(t);
+				t.render(bvh_tree, cam, background, max_depth, samples_per_pixel);
+				tile_width = tile_width + tile_scale;
+			}
+		}
+	}
+
+	bool rendering_fin = false;
+	while (!rendering_fin) {
+		if (tile::cores_left == _threadNum)
+			rendering_fin = true;
+	}
+
+	//Output
+	color* pixel_color = new color[image_width * image_height];
+	for (auto ti : tile_array) {
+		for (int j = ti.height_end - 1; j >= ti.height_begin; --j) {
+			for (int i = ti.width_begin; i < ti.width_end; i++) {
+				pixel_color[(image_height - 1 - j) * image_width + i] = ti.color_block[(j - ti.height_begin) * (ti.width_end - ti.width_begin) + (i - ti.width_begin)];
+			}
+		}
+	}
+
+	std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+	for (int k = 0; k < image_width * image_height; k++) {
+		write_color(std::cout, pixel_color[k], samples_per_pixel);
+	}
+
+
+	/*for (int j = image_height - 1; j >= 0; --j) {
 		//std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
 		for (int i = 0; i < image_width; ++i) {
 			color pixel_color(0, 0, 0);
@@ -389,11 +427,11 @@ int main() {
 				auto u = (i + random_double()) / (image_width - 1);
 				auto v = (j + random_double()) / (image_height - 1);
 				ray r = cam.get_ray(u, v);
-				pixel_color += ray_color(r, background, world, bvh_tree, max_depth);
+				pixel_color += ray_color(r, background, bvh_tree, max_depth);
 			}
 			write_color(std::cout, pixel_color, samples_per_pixel);
 		}
-	}
+	}*/
 
 	//std::cerr << "\nDone.\n";
 }
